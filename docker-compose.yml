@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   backend:
     image: python:3.11-slim
@@ -11,8 +9,11 @@ services:
       - "8000:8000"
     environment:
       - PYTHONUNBUFFERED=1
+      - DATABASE_URL=postgresql://legalmind:legalmind@db:5432/legalmind
+      - CHROMA_HOST=chroma
     depends_on:
       - db
+      - chroma
 
   frontend:
     image: node:20-alpine
@@ -38,5 +39,16 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
+  # ADD THIS FOR THE AI FEATURES
+  chroma:
+    image: chromadb/chroma:latest
+    ports:
+      - "8001:8000" # Mapped to 8001 to avoid any local port conflicts
+    volumes:
+      - chromadata:/chroma/chroma
+    environment:
+      - IS_PERSISTENT=TRUE
+
 volumes:
   pgdata:
+  chromadata:
