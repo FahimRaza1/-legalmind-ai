@@ -1,9 +1,33 @@
 from fastapi import FastAPI
+import psycopg2
+import chromadb
+import os
 
-app = FastAPI(title="Legalmind API")
-
+app = FastAPI()
 
 @app.get("/health")
-def health_check() -> dict[str, str]:
-    """Simple liveness probe."""
-    return {"status": "ok"}
+def health_check():
+    # Test Postgres Connection
+    db_status = "Down"
+    try:
+        conn = psycopg2.connect(os.getenv("DATABASE_URL"))
+        db_status = "Connected"
+        conn.close()
+    except Exception as e:
+        db_status = f"Error: {str(e)}"
+
+    # Test ChromaDB Connection
+    chroma_status = "Down"
+    try:
+        # Note: 'chroma' is the service name from your docker-compose
+        client = chromadb.HttpClient(host='chroma', port=8000)
+        client.heartbeat()
+        chroma_status = "Connected"
+    except Exception as e:
+        chroma_status = f"Error: {str(e)}"
+
+    return {
+        "api": "Running",
+        "postgres": db_status,
+        "chroma": chroma_status
+    }
