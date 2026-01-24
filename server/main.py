@@ -4,6 +4,11 @@ import psycopg2
 import chromadb
 import os
 import shutil
+import fitz  # PyMuPDF
+
+# Chunking configuration
+CHUNK_SIZE = 500  # Characters per chunk
+CHUNK_OVERLAP = 50  # Overlap to maintain context
 
 app = FastAPI()
 
@@ -52,5 +57,29 @@ async def upload_pdf(file: UploadFile = File(...)):
     
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
-        
-    return {"message": "Upload successful", "filename": file.filename}
+    
+    # Extract text from the saved PDF
+    text = ""
+    with fitz.open(file_path) as doc:
+        for page in doc:
+            text += page.get_text()
+    
+    # NEW: Simple Semantic Chunking
+    chunks = [text[i:i + CHUNK_SIZE] for i in range(0, len(text), CHUNK_SIZE - CHUNK_OVERLAP)]
+    
+    # Store in ChromaDB
+    client = chromadb.HttpClient(host='chroma', port=8000)
+    collection = client.get_or_create_collection(name="legal_docs")
+    
+    # Add chunks to the vector database
+    collection.add(
+        documents=chunks,
+        ids=[f"{file.filename}_{i}" for i in range(len(chunks))],
+        metadatas=[{"source": file.filename} for _ in range(len(chunks))]
+    )
+    
+    return {
+        "message": "Ingested into Vector DB",
+        "chunks_created": len(chunks),
+        "total_chars": len(text)
+    }

@@ -3,6 +3,7 @@ import { useState } from "react";
 
 export default function FileUpload() {
   const [file, setFile] = useState<File | null>(null);
+  const [status, setStatus] = useState<string>("");
 
   const handleUpload = async () => {
     if (!file) return alert("Please select a file first");
@@ -11,13 +12,18 @@ export default function FileUpload() {
     formData.append("file", file);
 
     try {
+      setStatus("Uploading and processing...");
       const response = await fetch("http://localhost:8000/upload", {
         method: "POST",
         body: formData,
       });
-      if (response.ok) alert("Upload Successful!");
+      const result = await response.json();
+      if (response.ok) {
+        setStatus(`Success! Processed ${result.characters_extracted} characters from ${result.filename}`);
+      }
     } catch (error) {
       console.error("Upload failed", error);
+      setStatus("Upload failed. Please try again.");
     }
   };
 
@@ -36,6 +42,9 @@ export default function FileUpload() {
       >
         Process Document
       </button>
+      {status && (
+        <p className="mt-4 text-sm text-center text-gray-700 font-medium">{status}</p>
+      )}
     </div>
   );
 }
