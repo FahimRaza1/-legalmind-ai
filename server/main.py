@@ -1,8 +1,9 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 import psycopg2
 import chromadb
 import os
+import shutil
 
 app = FastAPI()
 
@@ -40,3 +41,16 @@ def health_check():
         "postgres": db_status,
         "chroma": chroma_status
     }
+
+@app.post("/upload")
+async def upload_pdf(file: UploadFile = File(...)):
+    upload_dir = "uploads"
+    if not os.path.exists(upload_dir):
+        os.makedirs(upload_dir)
+    
+    file_path = os.path.join(upload_dir, file.filename)
+    
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+        
+    return {"message": "Upload successful", "filename": file.filename}
