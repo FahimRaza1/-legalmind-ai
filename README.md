@@ -24,3 +24,4 @@ Skeleton project layout for a dual-team setup:
 - Implement auth, document upload endpoints, and chat routes under server/app/api/.
 - Wire TanStack Query hooks to backend endpoints and build chat/PDF UI.
 - Fill ml_pipeline modules with your RAG, embedding, and parsing logic.
+second shivam
