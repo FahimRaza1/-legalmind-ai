@@ -6,8 +6,8 @@ export default function ConnectionStatus() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Use the Next.js rewrite proxy instead of direct localhost call
-    fetch("/api/v1/health")
+    // Call backend container directly during local Docker dev
+    fetch("http://localhost:8000/health")
       .then((res) => res.json())
       .then((data) => {
         setStatus(data);
