@@ -16,7 +16,7 @@ Skeleton project layout for a dual-team setup:
 
 1) Copy env vars into `.env` files for server and client as needed.
 2) Run `docker-compose up --build` to start dev services.
-3) Frontend: http://localhost:3000, Backend: http://localhost:8000/health, DB: Postgres on 5432.
+3) Frontend: http://localhost:3001, Backend: http://localhost:8000/health, DB: Postgres on 5432.
 
 ## Next Steps
 
