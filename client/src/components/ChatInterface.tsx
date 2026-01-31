@@ -4,8 +4,10 @@ import { useState } from "react";
 export default function ChatInterface() {
   const [query, setQuery] = useState("");
   const [response, setResponse] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const askAI = async () => {
+    setLoading(true);
     const res = await fetch("http://localhost:8000/query", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -13,6 +15,12 @@ export default function ChatInterface() {
     });
     const data = await res.json();
     setResponse(data.answer);
+    setLoading(false);
+  };
+
+  const clearChat = () => {
+    setQuery("");
+    setResponse("");
   };
 
   return (
@@ -25,14 +33,26 @@ export default function ChatInterface() {
       />
       <button
         onClick={askAI}
-        className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700"
+        disabled={loading}
+        className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
       >
-        Ask LegalMind
+        {loading ? "Searching..." : "Ask LegalMind"}
+      </button>
+      <button onClick={clearChat} className="ml-2 text-gray-400 hover:text-gray-600 underline text-sm">
+        Clear
       </button>
       {response && (
-        <div className="mt-4 p-4 bg-gray-100 rounded text-black font-medium">
-          {response}
-        </div>
+        response.includes("not in the uploaded document") ? (
+          <div className="mt-4 p-4 bg-orange-100 border-l-4 border-orange-500 rounded text-orange-800">
+            <p className="text-xs font-bold uppercase mb-1">⚠️ Out of Scope</p>
+            <p className="text-sm">{response}</p>
+          </div>
+        ) : (
+          <div className="mt-4 p-4 bg-blue-50 border-l-4 border-blue-500 rounded text-black">
+            <p className="text-xs font-bold text-blue-700 uppercase mb-1">Found in Document:</p>
+            <p className="text-sm leading-relaxed italic">"{response}"</p>
+          </div>
+        )
       )}
     </div>
   );

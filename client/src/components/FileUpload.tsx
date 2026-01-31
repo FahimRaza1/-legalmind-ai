@@ -19,7 +19,8 @@ export default function FileUpload() {
       });
       const result = await response.json();
       if (response.ok) {
-        setStatus(`Success! Processed ${result.characters_extracted} characters from ${result.filename}`);
+        // Change the keys to match exactly what Developer A's backend sends
+        setStatus(`✅ Success! Processed ${result.total_chars || 0} characters from ${result.filename || 'Document'}`);
       }
     } catch (error) {
       console.error("Upload failed", error);

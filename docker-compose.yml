@@ -8,6 +8,7 @@ services:
     environment:
       - DATABASE_URL=postgresql://legalmind:legalmind@db:5432/legalmind
       - CHROMA_HOST=chroma
+      - HUGGINGFACE_TOKEN=${HUGGINGFACE_TOKEN}
     depends_on:
       - db
       - chroma
